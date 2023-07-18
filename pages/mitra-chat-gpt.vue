@@ -1,8 +1,12 @@
 <template>
   <section>
     <div class="message-list bg-slate-200 p-4">
-      <template v-for="(message, id) in getMessages">
-        <chat-bubble :key="`bubble-${id}`" :message="message"></chat-bubble>
+      <template v-for="(message, id) in messages">
+        <chat-bubble
+          :key="`bubble-${id}`"
+          :message="message"
+          class="mt-4"
+        ></chat-bubble>
       </template>
     </div>
     <typing-area></typing-area>
@@ -10,9 +14,11 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import TypingArea from '~/components/TypingArea.vue'
 import ChatBubble from '~/components/ChatBubble.vue'
+
+let receiveMessageInterval = null
 
 export default {
   name: 'MitraChatGPT',
@@ -20,6 +26,26 @@ export default {
   computed: {
     ...mapGetters({
       getMessages: 'chatbotGpt/getMessages',
+      getIsChatting: 'chatbotGpt/getIsChatting',
+    }),
+
+    messages() {
+      return this.getMessages
+    },
+  },
+  watch: {
+    getIsChatting(newVal) {
+      if (newVal) {
+        receiveMessageInterval = setInterval(this.receiveMessagesAction, 5000)
+      }
+    },
+  },
+  beforeDestroy() {
+    clearInterval(receiveMessageInterval)
+  },
+  methods: {
+    ...mapActions({
+      receiveMessagesAction: 'chatbotGpt/receiveMessages',
     }),
   },
 }

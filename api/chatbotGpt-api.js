@@ -78,6 +78,7 @@ export const receiveMessages = ({ sessionKey = null, etag = null }) => {
     ]
     const index = Math.round(Math.random())
     const selectedReply = dummyReply[index]
+    console.log('dummy reply', selectedReply)
 
     const timeout = setTimeout(() => {
       const messages = localStorage.getItem(MESSAGES_LS_KEY)

@@ -48,13 +48,14 @@ const getters = {
 
     return messagesFromLS || state.messages
   },
+  getIsChatting: (state) => state.isChatting,
 }
 
 const mutationGeneratorParams = [
   { state: 'sendMessage', action: 'SendMessage' },
-  { state: 'sendAttachment', action: 'sendAttachment' },
-  { state: 'receiveMessages', action: 'receiveMessages' },
-  { state: 'endSession', action: 'endSession' },
+  { state: 'sendAttachment', action: 'SendAttachment' },
+  { state: 'receiveMessages', action: 'ReceiveMessages' },
+  { state: 'endSession', action: 'EndSession' },
 ]
 const mutations = {
   ...generateMutations([...mutationGeneratorParams]),
@@ -74,6 +75,7 @@ const mutations = {
   },
 
   setMessages: (state, payload) => {
+    localStorage.setItem(MESSAGES_LS_KEY, JSON.stringify(payload))
     state.messages = payload
   },
 
@@ -89,7 +91,7 @@ const actions = {
   },
 
   setEtag: ({ commit }, { etag = '' }) => {
-    commit('etag', { etag })
+    commit('setEtag', { etag })
   },
 
   setIsChatting: ({ commit }, { isChatting = false }) => {
