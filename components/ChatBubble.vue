@@ -1,9 +1,9 @@
 <template>
   <div
-    class="bubble w-100 flex flex-column"
+    class="bubble w-100 flex flex-col"
     :class="{
-      'align-start': nick !== 'visitor',
-      'align-end': nick === 'visitor',
+      'items-start': nick !== 'visitor',
+      'items-end': nick === 'visitor',
     }"
   >
     <div
@@ -11,8 +11,8 @@
     >
       <div v-html="message.content" />
     </div>
-    <div class="bubble__timestamp">
-      <p>{{ timestamp }}</p>
+    <div class="bubble__timestamp mt-2">
+      <p class="text-xs">{{ timestamp }}</p>
     </div>
   </div>
 </template>
