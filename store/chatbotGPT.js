@@ -8,6 +8,8 @@ import {
   // endSession,
 } from '~/api/chatbotGpt-api'
 
+const MESSAGES_LS_KEY = 'messages'
+
 const DEFAULT_STATE = {
   loading: false,
   data: null,
@@ -35,7 +37,17 @@ const getters = {
     const etagCookie = Cookies.get('etag')
     return etagCookie || state.etag
   },
-  getMessages: (state) => state.messages || [],
+  getMessages: (state) => {
+    if (process.server) {
+      return state.messages
+    }
+
+    const messagesFromLS = localStorage.getItem(MESSAGES_LS_KEY)
+      ? JSON.parse(localStorage.getItem(MESSAGES_LS_KEY))
+      : []
+
+    return messagesFromLS || state.messages
+  },
 }
 
 const mutationGeneratorParams = [
@@ -81,7 +93,7 @@ const actions = {
   },
 
   setIsChatting: ({ commit }, { isChatting = false }) => {
-    commit('isChatting', isChatting)
+    commit('setIsChatting', isChatting)
   },
 
   setMessages: ({ commit }, { messages = [] }) => {
@@ -92,7 +104,7 @@ const actions = {
     commit('setMessageOptions', messages)
   },
 
-  sendMessage: async ({ commit, dispatch, getters }, { message }) => {
+  sendMessage: async ({ commit, dispatch, getters }, { message = {} }) => {
     try {
       commit('beginSendMessage')
       const sessionKey = getters.getSessionKey || uuidv4()
@@ -104,11 +116,11 @@ const actions = {
       dispatch('setIsChatting', { isChatting: true })
     } catch (error) {
       commit('errorSendMessage', { error })
-      console.error('Something is wrong [sendMessage]')
+      console.error('Something is wrong [sendMessage]', error)
     }
   },
 
-  receiveMessages: async ({ commit, dispatch, getters }, { message }) => {
+  receiveMessages: async ({ commit, dispatch, getters }) => {
     try {
       commit('beginReceiveMessages')
       const sessionKey = getters.getSessionKey || uuidv4()

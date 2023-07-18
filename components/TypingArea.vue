@@ -4,19 +4,52 @@
   >
     <input
       id="text-message"
+      v-model="textMessage"
       type="text"
       placeholder="Any message"
       class="flex-1 border border-slate-300 rounded-lg p-2 mr-4"
+      @keyup.enter="sendMessage"
     />
-    <button type="button" class="w-20 border border-slate-300 rounded-lg p-2">
+    <button
+      type="button"
+      class="w-20 border border-slate-300 rounded-lg p-2"
+      @click="sendMessage"
+    >
       Send
     </button>
   </div>
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+import { MESSAGE_SCHEMA } from '~/schemas/message'
+
 export default {
   name: 'TypingArea',
+  data() {
+    return {
+      textMessage: '',
+    }
+  },
+  methods: {
+    ...mapActions({
+      sendMessageAction: 'chatbotGpt/sendMessage',
+    }),
+
+    async sendMessage() {
+      try {
+        const message = {
+          ...MESSAGE_SCHEMA,
+          content: this.textMessage,
+          nick: 'visitor',
+        }
+        this.textMessage = ''
+        await this.sendMessageAction({ message })
+      } catch (error) {
+        console.log('error', error)
+      }
+    },
+  },
 }
 </script>
 

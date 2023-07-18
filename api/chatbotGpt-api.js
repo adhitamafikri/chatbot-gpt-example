@@ -8,7 +8,7 @@ export const sendMessage = ({ message = {}, sessionKey = null }) => {
     ? JSON.parse(localStorage.getItem(MESSAGES_LS_KEY))
     : []
 
-  return Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const reqHeaders = {
       session_key: sessionKey,
     }
@@ -19,7 +19,7 @@ export const sendMessage = ({ message = {}, sessionKey = null }) => {
     console.log('requesting with body', reqBody)
     const timeout = setTimeout(() => {
       const newMessages = [...messages, { ...message }]
-      localStorage.setItem(MESSAGES_LS_KEY, JSON.parse(newMessages))
+      localStorage.setItem(MESSAGES_LS_KEY, JSON.stringify(newMessages))
       resolve({
         data: {
           message,
@@ -27,13 +27,13 @@ export const sendMessage = ({ message = {}, sessionKey = null }) => {
         },
       })
       clearTimeout(timeout)
-    }, 3000)
+    }, 1000)
   })
 }
 
 export const sendAttachment = ({ attachment = '', sessionKey = null }) => {
   console.log('Sending Attachment')
-  return Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const reqHeaders = {
       session_key: sessionKey,
     }
@@ -50,13 +50,13 @@ export const sendAttachment = ({ attachment = '', sessionKey = null }) => {
         },
       })
       clearTimeout(timeout)
-    }, 3000)
+    }, 1000)
   })
 }
 
 export const receiveMessages = ({ sessionKey = null, etag = null }) => {
   console.log('Receiving Messages')
-  return Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const reqHeaders = {
       session_key: sessionKey,
       etag,
@@ -67,11 +67,13 @@ export const receiveMessages = ({ sessionKey = null, etag = null }) => {
       {
         ...MESSAGE_SCHEMA,
         content: 'Reply from GPT',
+        nick: 'gpt',
       },
       {
         ...MESSAGE_SCHEMA,
         content: 'Reply from GPT With Options',
         options: ['PJ Morton', 'Mali', 'Bryson Tiller'],
+        nick: 'gpt',
       },
     ]
     const index = Math.round(Math.random())
@@ -90,13 +92,13 @@ export const receiveMessages = ({ sessionKey = null, etag = null }) => {
         },
       })
       clearTimeout(timeout)
-    }, 3000)
+    }, 1000)
   })
 }
 
 export const endSession = ({ sessionKey = null }) => {
   console.log('Ending Session')
-  return Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const reqHeaders = {
       session_key: sessionKey,
     }
@@ -108,6 +110,6 @@ export const endSession = ({ sessionKey = null }) => {
         },
       })
       clearTimeout(timeout)
-    }, 3000)
+    }, 1000)
   })
 }

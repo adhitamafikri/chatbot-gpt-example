@@ -4,4 +4,5 @@ export const MESSAGE_SCHEMA = {
   attachment: '',
   options: [],
   timestamp: new Date().getTime(),
+  nick: 'visitor',  // 'visitor' | 'gpt'
 }
