@@ -6,7 +6,7 @@ import {
   // sendAttachment,
   receiveMessages,
   // endSession,
-} from '~/api/chatbotGPT.api'
+} from '~/api/chatbotGpt-api'
 
 const DEFAULT_STATE = {
   loading: false,
