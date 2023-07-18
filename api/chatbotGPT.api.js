@@ -1,3 +1,5 @@
+import { MESSAGE_SCHEMA } from '~/schemas/message'
+
 const MESSAGES_LS_KEY = 'messages'
 
 export const sendMessage = ({ message = {}, sessionKey = null }) => {
@@ -60,14 +62,49 @@ export const receiveMessages = ({ sessionKey = null, etag = null }) => {
       etag,
     }
     console.log('requesting with headers', reqHeaders)
+
+    const dummyReply = [
+      {
+        ...MESSAGE_SCHEMA,
+        content: 'Reply from GPT',
+      },
+      {
+        ...MESSAGE_SCHEMA,
+        content: 'Reply from GPT With Options',
+        options: ['PJ Morton', 'Mali', 'Bryson Tiller'],
+      },
+    ]
+    const index = Math.round(Math.random())
+    const selectedReply = dummyReply[index]
+
     const timeout = setTimeout(() => {
       const messages = localStorage.getItem(MESSAGES_LS_KEY)
         ? JSON.parse(localStorage.getItem(MESSAGES_LS_KEY))
         : []
+      const newMessages = [...messages, { ...selectedReply }]
+
       resolve({
         data: {
-          messages,
-          msg: 'Success get message',
+          messages: newMessages,
+          msg: 'Success get messages',
+        },
+      })
+      clearTimeout(timeout)
+    }, 3000)
+  })
+}
+
+export const endSession = ({ sessionKey = null }) => {
+  console.log('Ending Session')
+  return Promise((resolve, reject) => {
+    const reqHeaders = {
+      session_key: sessionKey,
+    }
+    console.log('requesting with headers', reqHeaders)
+    const timeout = setTimeout(() => {
+      resolve({
+        data: {
+          msg: 'Success Ending Session',
         },
       })
       clearTimeout(timeout)
