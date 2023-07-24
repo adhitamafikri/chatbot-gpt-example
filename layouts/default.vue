@@ -16,7 +16,7 @@ export default {
 
 <style lang="css">
 #main {
-  min-width: 480px;
+  min-width: 360px;
   max-width: 640px;
   height: 100vh;
   overflow: auto;

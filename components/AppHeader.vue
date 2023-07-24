@@ -1,7 +1,7 @@
 <template>
   <div class="header bg-white shadow-md flex flex-row items-center p-8">
-    <button type="button" class="cursor-pointer" @click="onBackClick">
-      <p class="mr-8">&lt;-</p>
+    <button type="button" class="cursor-pointer mr-2" @click="onBackClick">
+      <p>&lt;-</p>
     </button>
     <p class="font-medium">Example App</p>
   </div>
