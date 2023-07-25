@@ -3,7 +3,6 @@ import { MESSAGE_SCHEMA } from '~/schemas/message'
 const MESSAGES_LS_KEY = 'messages'
 
 export const sendMessage = ({ message = {}, sessionKey = null }) => {
-  console.log('Sending Message')
   const messages = localStorage.getItem(MESSAGES_LS_KEY)
     ? JSON.parse(localStorage.getItem(MESSAGES_LS_KEY))
     : []
@@ -32,7 +31,6 @@ export const sendMessage = ({ message = {}, sessionKey = null }) => {
 }
 
 export const sendAttachment = ({ attachment = '', sessionKey = null }) => {
-  console.log('Sending Attachment')
   return new Promise((resolve, reject) => {
     const reqHeaders = {
       session_key: sessionKey,
@@ -55,7 +53,6 @@ export const sendAttachment = ({ attachment = '', sessionKey = null }) => {
 }
 
 export const receiveMessages = ({ sessionKey = null, etag = null }) => {
-  console.log('Receiving Messages')
   return new Promise((resolve, reject) => {
     const reqHeaders = {
       session_key: sessionKey,
@@ -78,7 +75,6 @@ export const receiveMessages = ({ sessionKey = null, etag = null }) => {
     ]
     const index = Math.round(Math.random())
     const selectedReply = dummyReply[index]
-    console.log('dummy reply', selectedReply)
 
     const timeout = setTimeout(() => {
       const messages = localStorage.getItem(MESSAGES_LS_KEY)
@@ -98,7 +94,6 @@ export const receiveMessages = ({ sessionKey = null, etag = null }) => {
 }
 
 export const endSession = ({ sessionKey = null }) => {
-  console.log('Ending Session')
   return new Promise((resolve, reject) => {
     const reqHeaders = {
       session_key: sessionKey,

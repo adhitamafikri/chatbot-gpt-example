@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie'
 import { v4 as uuidv4 } from 'uuid'
+import { LS_KEYS } from '~/utils/storage-keys'
 import generateMutations from '~/utils/generate-mutations'
 import {
   sendMessage,
@@ -7,8 +8,6 @@ import {
   receiveMessages,
   // endSession,
 } from '~/api/chatbotGpt-api'
-
-const MESSAGES_LS_KEY = 'messages'
 
 const DEFAULT_STATE = {
   loading: false,
@@ -37,17 +36,7 @@ const getters = {
     const etagCookie = Cookies.get('etag')
     return etagCookie || state.etag
   },
-  getMessages: (state) => {
-    if (process.server) {
-      return state.messages
-    }
-
-    const messagesFromLS = localStorage.getItem(MESSAGES_LS_KEY)
-      ? JSON.parse(localStorage.getItem(MESSAGES_LS_KEY))
-      : []
-
-    return messagesFromLS || state.messages
-  },
+  getMessages: (state) => state.messages,
   getIsChatting: (state) => state.isChatting,
 }
 
@@ -75,7 +64,7 @@ const mutations = {
   },
 
   setMessages: (state, payload) => {
-    localStorage.setItem(MESSAGES_LS_KEY, JSON.stringify(payload))
+    localStorage.setItem(LS_KEYS.messages, JSON.stringify(payload))
     state.messages = payload
   },
 
@@ -86,8 +75,8 @@ const mutations = {
 
 const actions = {
   setSessionKey: ({ commit }, { sessionKey = '' }) => {
-    const fiveMinutes = new Date().getTime() + 5 * 60 * 1000
-    commit('setSessionKey', { sessionKey, expires: new Date(fiveMinutes) })
+    const oneMinute = new Date().getTime() + 1 * 60 * 1000
+    commit('setSessionKey', { sessionKey, expires: new Date(oneMinute) })
   },
 
   setEtag: ({ commit }, { etag = '' }) => {
@@ -106,6 +95,30 @@ const actions = {
     commit('setMessageOptions', messages)
   },
 
+  /**
+   * Invoke this action in the mounted() hook
+   */
+  getChatLogs: ({ dispatch, getters }) => {
+    // Alt 1 - Cookie approach
+    const sessionKey = getters.getSessionKey
+
+    /**
+     * temporary because of localStorage
+     * if the actual action calls API,
+     */
+    if (process.client && sessionKey) {
+      dispatch('receiveMessages')
+
+      dispatch(
+        'logging/log',
+        {
+          message: 'getChatLog() - success getting message from API/storage',
+        },
+        { root: true }
+      )
+    }
+  },
+
   sendMessage: async ({ commit, dispatch, getters }, { message = {} }) => {
     try {
       commit('beginSendMessage')
@@ -116,8 +129,24 @@ const actions = {
       commit('successSendMessage', { data })
 
       dispatch('setIsChatting', { isChatting: true })
+
+      dispatch(
+        'logging/log',
+        {
+          message: `sendMessage() - sent: ${message.content}`,
+        },
+        { root: true }
+      )
     } catch (error) {
       commit('errorSendMessage', { error })
+      dispatch(
+        'logging/log',
+        {
+          message: `sendMessage() - error: ${error}`,
+          type: 'error',
+        },
+        { root: true }
+      )
       console.error('Something is wrong [sendMessage]', error)
     }
   },
@@ -135,7 +164,23 @@ const actions = {
       dispatch('setMessages', { messages: data.messages })
 
       dispatch('setIsChatting', { isChatting: true })
+
+      dispatch(
+        'logging/log',
+        {
+          message: `receiveMessages() - success`,
+        },
+        { root: true }
+      )
     } catch (error) {
+      dispatch(
+        'logging/log',
+        {
+          message: `receiveMessages() - error`,
+          type: 'error',
+        },
+        { root: true }
+      )
       commit('errorReceiveMessages', { error })
       console.error('Something is wrong [receiveMessages]')
     }

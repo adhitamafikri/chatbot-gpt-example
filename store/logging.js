@@ -13,8 +13,8 @@ const mutations = {
 }
 
 const actions = {
-  log: ({ commit }, { log = '', type = 'info' }) => {
-    commit('setLogs', { log, type })
+  log: ({ commit }, { message = '', type = 'info' }) => {
+    commit('setLogs', { message, type })
   },
 }
 

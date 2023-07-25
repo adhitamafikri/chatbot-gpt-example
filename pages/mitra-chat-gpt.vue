@@ -43,8 +43,12 @@ export default {
   beforeDestroy() {
     clearInterval(receiveMessageInterval)
   },
+  mounted() {
+    this.getChatLogs()
+  },
   methods: {
     ...mapActions({
+      getChatLogs: 'chatbotGpt/getChatLogs',
       receiveMessagesAction: 'chatbotGpt/receiveMessages',
     }),
   },

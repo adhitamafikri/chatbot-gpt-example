@@ -34,7 +34,8 @@ export default {
       return this.message.nick
     },
     timestamp() {
-      return this.message.timestamp
+      const { timestamp } = this.message
+      return timestamp ? new Date(timestamp).toUTCString() : ''
     },
   },
 }
