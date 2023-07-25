@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div class="message-list bg-slate-200 p-4">
+    <div ref="messageList" class="message-list bg-slate-200 p-4">
       <template v-for="(message, id) in messages">
         <chat-bubble
           :key="`bubble-${id}`"
