@@ -5,6 +5,8 @@ export const LS_KEYS = {
 }
 
 export const COOKIE_NAME = {
+  sessionIdServer: 'sessionIdServer',
+  etagServer: 'etagServer',
   sessionId: 'sessionId',
   etag: 'etag',
 }

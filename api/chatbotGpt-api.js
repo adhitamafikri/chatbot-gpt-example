@@ -1,12 +1,9 @@
+import Cookies from 'js-cookie'
+import { v4 as uuidv4 } from 'uuid'
+import { COOKIE_NAME, LS_KEYS } from '~/utils/storage-keys'
 import { MESSAGE_SCHEMA } from '~/schemas/message'
 
-const MESSAGES_LS_KEY = 'messages'
-
 export const sendMessage = ({ message = {}, sessionId = null }) => {
-  const messages = localStorage.getItem(MESSAGES_LS_KEY)
-    ? JSON.parse(localStorage.getItem(MESSAGES_LS_KEY))
-    : []
-
   return new Promise((resolve, reject) => {
     const reqHeaders = {
       session_id: sessionId,
@@ -17,8 +14,6 @@ export const sendMessage = ({ message = {}, sessionId = null }) => {
     console.log('requesting with headers', reqHeaders)
     console.log('requesting with body', reqBody)
     const timeout = setTimeout(() => {
-      const newMessages = [...messages, { ...message }]
-      localStorage.setItem(MESSAGES_LS_KEY, JSON.stringify(newMessages))
       resolve({
         data: {
           message,
@@ -73,18 +68,42 @@ export const receiveMessages = ({ sessionId = null, etag = null }) => {
         nick: 'gpt',
       },
     ]
-    const index = Math.round(Math.random())
+    const index = Math.round(Math.random() * 5)
     const selectedReply = dummyReply[index]
 
-    const timeout = setTimeout(() => {
-      const messages = localStorage.getItem(MESSAGES_LS_KEY)
-        ? JSON.parse(localStorage.getItem(MESSAGES_LS_KEY))
-        : []
-      const newMessages = [...messages, { ...selectedReply }]
+    const messages = localStorage.getItem(LS_KEYS.messages)
+      ? JSON.parse(localStorage.getItem(LS_KEYS.messages))
+      : []
+    const newMessages = [...messages, ...(selectedReply ? [selectedReply] : [])]
 
+    const sessionIdServerCookie = Cookies.get(COOKIE_NAME.sessionIdServer)
+    let sessionIdForResponse = sessionIdServerCookie
+
+    if (!sessionIdForResponse) {
+      const expiredAt = new Date().getTime() + 5 * 60 * 1000
+      sessionIdForResponse = uuidv4()
+      Cookies.set(COOKIE_NAME.sessionIdServer, sessionIdForResponse, {
+        expires: new Date(expiredAt),
+      })
+    }
+
+    const etagServerCookie = Cookies.get(COOKIE_NAME.etagServer)
+    let etagForResponse = etagServerCookie
+
+    if (!etagForResponse) {
+      const expiredAt = new Date().getTime() + 5 * 60 * 1000
+      etagForResponse = uuidv4()
+      Cookies.set(COOKIE_NAME.etagServer, etagForResponse, {
+        expires: new Date(expiredAt),
+      })
+    }
+
+    const timeout = setTimeout(() => {
       resolve({
         data: {
           messages: newMessages,
+          session_id: sessionIdForResponse,
+          etag: etagForResponse,
           msg: 'Success get messages',
         },
       })

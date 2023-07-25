@@ -1,5 +1,4 @@
 import Cookies from 'js-cookie'
-import { v4 as uuidv4 } from 'uuid'
 import { LS_KEYS } from '~/utils/storage-keys'
 import generateMutations from '~/utils/generate-mutations'
 import {
@@ -75,11 +74,15 @@ const mutations = {
 
 const actions = {
   setSessionId: ({ commit }, { sessionId = '' }) => {
-    const oneMinute = new Date().getTime() + 1 * 60 * 1000
-    commit('setSessionId', { sessionId, expires: new Date(oneMinute) })
+    if (!sessionId) return
+
+    const expiredAt = new Date().getTime() + 5 * 60 * 1000
+    commit('setSessionId', { sessionId, expires: new Date(expiredAt) })
   },
 
   setEtag: ({ commit }, { etag = '' }) => {
+    if (!etag) return
+
     commit('setEtag', { etag })
   },
 
@@ -121,8 +124,11 @@ const actions = {
 
   sendMessage: async ({ commit, dispatch, getters }, { message = {} }) => {
     try {
+      const currentMessages = getters.getMessages
+      dispatch('setMessages', { messages: [...currentMessages, message] })
+
       commit('beginSendMessage')
-      const sessionId = getters.getSessionId || uuidv4()
+      const sessionId = getters.getSessionId
       dispatch('setSessionId', { sessionId })
 
       const { data } = await sendMessage({ message, sessionId })
@@ -154,15 +160,15 @@ const actions = {
   receiveMessages: async ({ commit, dispatch, getters }) => {
     try {
       commit('beginReceiveMessages')
-      const sessionId = getters.getSessionId || uuidv4()
+      const sessionId = getters.getSessionId
       const etag = getters.getEtag
-      dispatch('setSessionId', { sessionId })
-      dispatch('setEtag', { etag })
 
       const { data } = await receiveMessages({ sessionId, etag })
       commit('beginReceiveMessages', { data })
-      dispatch('setMessages', { messages: data.messages })
 
+      dispatch('setMessages', { messages: data.messages })
+      dispatch('setSessionId', { sessionId: data.session_id })
+      dispatch('setEtag', { etag: data.etag })
       dispatch('setIsChatting', { isChatting: true })
 
       dispatch(
@@ -182,7 +188,7 @@ const actions = {
         { root: true }
       )
       commit('errorReceiveMessages', { error })
-      console.error('Something is wrong [receiveMessages]')
+      console.error('Something is wrong [receiveMessages]', error)
     }
   },
 }
