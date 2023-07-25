@@ -16,7 +16,7 @@ const DEFAULT_STATE = {
 }
 
 const state = () => ({
-  sessionKey: null,
+  sessionId: null,
   etag: null,
   isChatting: false,
   messages: [],
@@ -28,9 +28,9 @@ const state = () => ({
 })
 
 const getters = {
-  getSessionKey: (state) => {
-    const sessionKeyCookie = Cookies.get('sessionKey')
-    return sessionKeyCookie || state.sessionKey
+  getSessionId: (state) => {
+    const sessionKeyCookie = Cookies.get('sessionId')
+    return sessionKeyCookie || state.sessionId
   },
   getEtag: (state) => {
     const etagCookie = Cookies.get('etag')
@@ -49,9 +49,9 @@ const mutationGeneratorParams = [
 const mutations = {
   ...generateMutations([...mutationGeneratorParams]),
 
-  setSessionKey: (state, { sessionKey, expires }) => {
-    state.sessionKey = sessionKey
-    Cookies.set('sessionKey', sessionKey, { expires })
+  setSessionId: (state, { sessionId, expires }) => {
+    state.sessionId = sessionId
+    Cookies.set('sessionId', sessionId, { expires })
   },
 
   setEtag: (state, { etag }) => {
@@ -74,9 +74,9 @@ const mutations = {
 }
 
 const actions = {
-  setSessionKey: ({ commit }, { sessionKey = '' }) => {
+  setSessionId: ({ commit }, { sessionId = '' }) => {
     const oneMinute = new Date().getTime() + 1 * 60 * 1000
-    commit('setSessionKey', { sessionKey, expires: new Date(oneMinute) })
+    commit('setSessionId', { sessionId, expires: new Date(oneMinute) })
   },
 
   setEtag: ({ commit }, { etag = '' }) => {
@@ -100,13 +100,13 @@ const actions = {
    */
   getChatLogs: ({ dispatch, getters }) => {
     // Alt 1 - Cookie approach
-    const sessionKey = getters.getSessionKey
+    const sessionId = getters.getSessionId
 
     /**
      * temporary because of localStorage
      * if the actual action calls API,
      */
-    if (process.client && sessionKey) {
+    if (process.client && sessionId) {
       dispatch('receiveMessages')
 
       dispatch(
@@ -122,10 +122,10 @@ const actions = {
   sendMessage: async ({ commit, dispatch, getters }, { message = {} }) => {
     try {
       commit('beginSendMessage')
-      const sessionKey = getters.getSessionKey || uuidv4()
-      dispatch('setSessionKey', { sessionKey })
+      const sessionId = getters.getSessionId || uuidv4()
+      dispatch('setSessionId', { sessionId })
 
-      const { data } = await sendMessage({ message, sessionKey })
+      const { data } = await sendMessage({ message, sessionId })
       commit('successSendMessage', { data })
 
       dispatch('setIsChatting', { isChatting: true })
@@ -154,12 +154,12 @@ const actions = {
   receiveMessages: async ({ commit, dispatch, getters }) => {
     try {
       commit('beginReceiveMessages')
-      const sessionKey = getters.getSessionKey || uuidv4()
+      const sessionId = getters.getSessionId || uuidv4()
       const etag = getters.getEtag
-      dispatch('setSessionKey', { sessionKey })
+      dispatch('setSessionId', { sessionId })
       dispatch('setEtag', { etag })
 
-      const { data } = await receiveMessages({ sessionKey, etag })
+      const { data } = await receiveMessages({ sessionId, etag })
       commit('beginReceiveMessages', { data })
       dispatch('setMessages', { messages: data.messages })
 

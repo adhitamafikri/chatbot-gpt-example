@@ -1,10 +1,10 @@
 export const LS_KEYS = {
-  sessionKey: 'sessionKey',
+  sessionId: 'sessionId',
   etag: 'etag',
   messages: 'messages',
 }
 
 export const COOKIE_NAME = {
-  sessionKey: 'sessionKey',
+  sessionId: 'sessionId',
   etag: 'etag',
 }

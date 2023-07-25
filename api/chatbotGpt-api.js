@@ -2,14 +2,14 @@ import { MESSAGE_SCHEMA } from '~/schemas/message'
 
 const MESSAGES_LS_KEY = 'messages'
 
-export const sendMessage = ({ message = {}, sessionKey = null }) => {
+export const sendMessage = ({ message = {}, sessionId = null }) => {
   const messages = localStorage.getItem(MESSAGES_LS_KEY)
     ? JSON.parse(localStorage.getItem(MESSAGES_LS_KEY))
     : []
 
   return new Promise((resolve, reject) => {
     const reqHeaders = {
-      session_key: sessionKey,
+      session_id: sessionId,
     }
     const reqBody = {
       message,
@@ -30,10 +30,10 @@ export const sendMessage = ({ message = {}, sessionKey = null }) => {
   })
 }
 
-export const sendAttachment = ({ attachment = '', sessionKey = null }) => {
+export const sendAttachment = ({ attachment = '', sessionId = null }) => {
   return new Promise((resolve, reject) => {
     const reqHeaders = {
-      session_key: sessionKey,
+      session_id: sessionId,
     }
     const reqBody = {
       attachment,
@@ -52,10 +52,10 @@ export const sendAttachment = ({ attachment = '', sessionKey = null }) => {
   })
 }
 
-export const receiveMessages = ({ sessionKey = null, etag = null }) => {
+export const receiveMessages = ({ sessionId = null, etag = null }) => {
   return new Promise((resolve, reject) => {
     const reqHeaders = {
-      session_key: sessionKey,
+      session_id: sessionId,
       etag,
     }
     console.log('requesting with headers', reqHeaders)
@@ -93,10 +93,10 @@ export const receiveMessages = ({ sessionKey = null, etag = null }) => {
   })
 }
 
-export const endSession = ({ sessionKey = null }) => {
+export const endSession = ({ sessionId = null }) => {
   return new Promise((resolve, reject) => {
     const reqHeaders = {
-      session_key: sessionKey,
+      session_id: sessionId,
     }
     console.log('requesting with headers', reqHeaders)
     const timeout = setTimeout(() => {

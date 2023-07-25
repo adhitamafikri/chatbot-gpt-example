@@ -2,9 +2,9 @@ sequenceDiagram
     Actor User
     User->>MitraChatGPT: access '/mitra-chat-gpt'
     MitraChatGPT-->>User: show MitraChatGPT page
-    MitraChatGPT->>Vuex: check getter `getSessionKey`
-    Vuex-->>MitraChatGPT: returns `sessionKey`
-    opt sessionKey exists
+    MitraChatGPT->>Vuex: check getter `getSessionId`
+    Vuex-->>MitraChatGPT: returns `sessionId`
+    opt sessionId exists
         loop every five seconds
             MitraChatGPT->>Vuex: dispatch action `receiveMessages`
             alt success

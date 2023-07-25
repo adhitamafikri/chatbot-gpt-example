@@ -10,11 +10,9 @@
     <div
       class="bubble__inner bg-white shadow-lg border border-slate-300 rounded-lg p-4"
     >
-      <div class="mb-2">
-        <div v-html="message.content" />
-      </div>
-
-      <div v-if="options && options.length > 0" class="bubble__options">
+      <div v-html="message.content" />
+      
+      <div v-if="options && options.length > 0" class="bubble__options mt-2">
         <button
           v-for="(option, id) in options"
           :key="`option-${id}`"
