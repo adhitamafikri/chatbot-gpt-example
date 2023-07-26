@@ -9,13 +9,19 @@
       <p class="font-medium">Example App</p>
     </div>
 
-    <button
-      type="button"
-      class="w-20 border border-slate-300 rounded-lg p-2"
-      @click="onLogsClick(true)"
-    >
-      Logs
-    </button>
+    <div class="flex flex-row items-center">
+      <select class="mr-4" @change="onOptionsModeChange">
+        <option value="bubble">bubble options</option>
+        <option value="chip">chip options</option>
+      </select>
+      <button
+        type="button"
+        class="w-20 border border-slate-300 rounded-lg p-2"
+        @click="onLogsClick(true)"
+      >
+        Logs
+      </button>
+    </div>
 
     <div v-if="isLogsActive" class="logs p-4">
       <p
@@ -27,9 +33,7 @@
           'bg-red-200': log.type === 'error',
         }"
       >
-        <span>
-          {{ id + 1 }}.
-        </span>
+        <span> {{ id + 1 }}. </span>
         {{ log.message }}
       </p>
 
@@ -45,7 +49,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'AppHeader',
@@ -60,9 +64,22 @@ export default {
     }),
   },
   methods: {
+    ...mapActions({
+      setOptionsMode: 'chatbotGpt/setOptionsMode',
+    }),
+
     onBackClick() {
       this.$router.go(-1)
     },
+
+    /**
+     *
+     * @param {Event} evt
+     */
+    onOptionsModeChange(evt) {
+      this.setOptionsMode({ mode: evt.target.value })
+    },
+
     onLogsClick(active = false) {
       this.isLogsActive = active
     },

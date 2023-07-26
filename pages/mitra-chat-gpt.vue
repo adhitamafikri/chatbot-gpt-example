@@ -3,18 +3,25 @@
     <div
       ref="messageList"
       class="message-list bg-slate-200 p-4"
-      :class="{ 'message-list--has-options': hasOptions }"
+      :class="{
+        'message-list--has-options':
+          hasOptions && !shouldDisplayOptionsInBubble,
+      }"
     >
       <template v-for="(message, id) in messages">
         <chat-bubble
           :key="`bubble-${id}`"
           :message="message"
+          :bubble-options="shouldDisplayOptionsInBubble"
           class="mt-4"
         ></chat-bubble>
       </template>
     </div>
 
-    <chat-options v-if="hasOptions" :options="options"></chat-options>
+    <chat-options
+      v-if="hasOptions && !shouldDisplayOptionsInBubble"
+      :options="options"
+    ></chat-options>
     <typing-area></typing-area>
   </section>
 </template>
@@ -36,6 +43,7 @@ export default {
     ...mapGetters({
       getMessages: 'chatbotGpt/getMessages',
       getIsChatting: 'chatbotGpt/getIsChatting',
+      getOptionsMode: 'chatbotGpt/getOptionsMode',
     }),
 
     messages() {
@@ -64,6 +72,10 @@ export default {
 
     hasOptions() {
       return !!this.options?.length
+    },
+
+    shouldDisplayOptionsInBubble() {
+      return this.getOptionsMode === 'bubble'
     },
   },
   watch: {

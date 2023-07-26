@@ -12,7 +12,7 @@
     >
       <div v-html="message.content" />
 
-      <div v-if="options && options.length > 0" class="bubble__options mt-2">
+      <div v-if="bubbleOptions && hasOptions" class="bubble__options mt-2">
         <button
           v-for="(option, id) in options"
           :key="`option-${id}`"
@@ -41,6 +41,11 @@ export default {
       type: Object,
       required: true,
     },
+    bubbleOptions: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   computed: {
     content() {
@@ -55,6 +60,9 @@ export default {
     },
     options() {
       return this.message.options
+    },
+    hasOptions() {
+      return !!this.options?.length
     },
   },
   methods: {

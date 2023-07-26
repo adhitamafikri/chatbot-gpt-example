@@ -24,6 +24,7 @@ const state = () => ({
   sendAttachment: { ...DEFAULT_STATE },
   receiveMessages: { ...DEFAULT_STATE },
   endSession: { ...DEFAULT_STATE },
+  optionsMode: 'bubble',
 })
 
 const getters = {
@@ -37,6 +38,7 @@ const getters = {
   },
   getMessages: (state) => state.messages,
   getIsChatting: (state) => state.isChatting,
+  getOptionsMode: (state) => state.optionsMode,
 }
 
 const mutationGeneratorParams = [
@@ -70,6 +72,10 @@ const mutations = {
   setMessageOptions: (state, payload) => {
     state.messageOptions = payload
   },
+
+  setOptionsMode: (state, payload) => {
+    state.optionsMode = payload
+  },
 }
 
 const actions = {
@@ -98,6 +104,10 @@ const actions = {
     commit('setMessageOptions', messages)
   },
 
+  setOptionsMode: ({ commit }, { mode = '' }) => {
+    commit('setOptionsMode', mode)
+  },
+
   /**
    * Invoke this action in the mounted() hook
    */
@@ -106,8 +116,7 @@ const actions = {
     const sessionId = getters.getSessionId
 
     /**
-     * temporary because of localStorage
-     * if the actual action calls API,
+     * temporaryly use process.client because of localStorage
      */
     if (process.client && sessionId) {
       dispatch('receiveMessages')
