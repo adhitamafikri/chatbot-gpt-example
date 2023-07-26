@@ -67,9 +67,16 @@ export const receiveMessages = ({ sessionId = null, etag = null }) => {
         options: ['PJ Morton', 'Mali', 'Bryson Tiller'],
         nick: 'gpt',
       },
+      {
+        ...MESSAGE_SCHEMA,
+        content: 'Reply from GPT With Options',
+        options: ['PJ Morton', 'Mali', 'Bryson Tiller', 'TM88', 'Snoh Aalegra', 'Migos'],
+        nick: 'gpt',
+      },
     ]
-    const index = Math.round(Math.random() * 5)
-    const selectedReply = dummyReply[index]
+    // const index = Math.round(Math.random() * 5)
+    // const selectedReply = dummyReply[index]
+    const selectedReply = dummyReply[2]
 
     const messages = localStorage.getItem(LS_KEYS.messages)
       ? JSON.parse(localStorage.getItem(LS_KEYS.messages))

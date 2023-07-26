@@ -164,7 +164,7 @@ const actions = {
       const etag = getters.getEtag
 
       const { data } = await receiveMessages({ sessionId, etag })
-      commit('beginReceiveMessages', { data })
+      commit('successReceiveMessages', { data: data.messages })
 
       dispatch('setMessages', { messages: data.messages })
       dispatch('setSessionId', { sessionId: data.session_id })
