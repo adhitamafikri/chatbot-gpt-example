@@ -1,5 +1,12 @@
-import Vue from 'vue';
+import Vue from 'vue'
 
-const chatbotGptEventBus = new Vue();
+export const busEvents = {
+  sendMessage: 'sendMessage',
+  sendAttachment: 'sendAttachment',
+  receiveMessage: 'receiveMessage',
+  endSession: 'endSession',
+}
 
-export default chatbotGptEventBus;
+const chatbotGptEventBus = new Vue()
+
+export default chatbotGptEventBus

@@ -21,6 +21,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import chatbotGptEventBus, { busEvents } from '~/utils/chatbotGptEventBus'
+import { MESSAGE_SCHEMA } from '~/schemas/message'
 import TypingArea from '~/components/TypingArea.vue'
 import ChatBubble from '~/components/ChatBubble.vue'
 import ChatOptions from '~/components/ChatOptions.vue'
@@ -71,17 +73,46 @@ export default {
       }
     },
   },
-  beforeDestroy() {
-    clearInterval(receiveMessageInterval)
-  },
   mounted() {
     this.getChatLogs()
+
+    chatbotGptEventBus.$on(busEvents.sendMessage, this.onSendMessage)
+    chatbotGptEventBus.$on(busEvents.receiveMessage, this.onReceiveMessage)
+  },
+  beforeDestroy() {
+    clearInterval(receiveMessageInterval)
+    chatbotGptEventBus.$off(busEvents.sendMessage)
+    chatbotGptEventBus.$off(busEvents.receiveMessage)
   },
   methods: {
     ...mapActions({
       getChatLogs: 'chatbotGpt/getChatLogs',
+      sendMessageAction: 'chatbotGpt/sendMessage',
       receiveMessagesAction: 'chatbotGpt/receiveMessages',
     }),
+
+    /**
+     * This action will be invoked by every component that $emits 'sendMessage' event from chatbotGptEventBus
+     * This action will actually send the message
+     * @param {object} param - emitted from 'sendMessage' event from chatbotGptEventBus
+     * @param {string} param.text - emitted from 'sendMessage' event from chatbotGptEventBus
+     */
+    async onSendMessage({ text = '' }) {
+      try {
+        const message = {
+          ...MESSAGE_SCHEMA,
+          content: text,
+          nick: 'visitor',
+        }
+        await this.sendMessageAction({ message })
+      } catch (error) {
+        console.log('error', error)
+      }
+    },
+
+    onReceiveMessage() {
+      console.log('receiving message')
+    },
   },
 }
 </script>

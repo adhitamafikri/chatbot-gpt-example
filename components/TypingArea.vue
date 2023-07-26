@@ -21,8 +21,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
-import { MESSAGE_SCHEMA } from '~/schemas/message'
+import chatbotGptEventBus, { busEvents } from '~/utils/chatbotGptEventBus'
 
 export default {
   name: 'TypingArea',
@@ -32,22 +31,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions({
-      sendMessageAction: 'chatbotGpt/sendMessage',
-    }),
-
-    async sendMessage() {
-      try {
-        const message = {
-          ...MESSAGE_SCHEMA,
-          content: this.textMessage,
-          nick: 'visitor',
-        }
-        this.textMessage = ''
-        await this.sendMessageAction({ message })
-      } catch (error) {
-        console.log('error', error)
-      }
+    sendMessage() {
+      chatbotGptEventBus.$emit(busEvents.sendMessage, {
+        text: this.textMessage,
+      })
+      this.textMessage = ''
     },
   },
 }
