@@ -59,6 +59,9 @@ export default {
      */
     lastMessage() {
       const messagesLength = this.messages?.length
+      if (!messagesLength) {
+        return {}
+      }
       return this.getMessages[messagesLength - 1]
     },
 
