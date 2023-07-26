@@ -3,7 +3,7 @@
     <div
       v-for="(option, id) in options"
       :key="`chat-opt-${id}`"
-      class="chat-options__chip bg-orange-200 p-2 border rounded grow shrink-0 text-center mr-4"
+      class="chat-options__chip bg-lime-100 p-2 border rounded grow shrink-0 text-center mr-4"
       @click="onOptionClick(option)"
     >
       {{ option }}
