@@ -32,6 +32,7 @@
 
 <script>
 import { mapActions } from 'vuex'
+import chatbotGptEventBus, { busEvents } from '~/utils/chatbotGptEventBus'
 
 export default {
   name: 'ChatBubble',
@@ -62,8 +63,11 @@ export default {
     }),
 
     onOptionClick(option = '') {
+      chatbotGptEventBus.$emit(busEvents.sendMessage, {
+        text: option,
+      })
       this.log({
-        message: `onOptionClick() - selected option ${option}`,
+        message: `onOptionClick() - ChatBubble - ${option}`,
       })
     },
   },

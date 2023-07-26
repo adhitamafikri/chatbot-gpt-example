@@ -4,6 +4,7 @@
       v-for="(option, id) in options"
       :key="`chat-opt-${id}`"
       class="chat-options__chip bg-orange-200 p-2 border rounded grow shrink-0 text-center mr-4"
+      @click="onOptionClick(option)"
     >
       {{ option }}
     </div>
@@ -11,12 +12,29 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+import chatbotGptEventBus, { busEvents } from '~/utils/chatbotGptEventBus'
+
 export default {
   name: 'ChatOptions',
   props: {
     options: {
       type: Array,
       default: () => [],
+    },
+  },
+  methods: {
+    ...mapActions({
+      log: 'logging/log',
+    }),
+
+    onOptionClick(option = '') {
+      chatbotGptEventBus.$emit(busEvents.sendMessage, {
+        text: option,
+      })
+      this.log({
+        message: `onOptionClick() - ChatOptions - ${option}`,
+      })
     },
   },
 }

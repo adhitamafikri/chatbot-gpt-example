@@ -74,9 +74,9 @@ export const receiveMessages = ({ sessionId = null, etag = null }) => {
         nick: 'gpt',
       },
     ]
-    // const index = Math.round(Math.random() * 5)
-    // const selectedReply = dummyReply[index]
-    const selectedReply = dummyReply[2]
+    const index = Math.round(Math.random() * 5)
+    const selectedReply = dummyReply[index]
+    // const selectedReply = dummyReply[2]
 
     const messages = localStorage.getItem(LS_KEYS.messages)
       ? JSON.parse(localStorage.getItem(LS_KEYS.messages))
