@@ -5,7 +5,7 @@ import {
   sendMessage,
   sendAttachment,
   receiveMessages,
-  // endSession,
+  endSession,
 } from '~/api/chatbotGpt-api'
 
 const DEFAULT_STATE = {
@@ -51,11 +51,19 @@ const mutations = {
   ...generateMutations([...mutationGeneratorParams]),
 
   setSessionId: (state, { sessionId, expires }) => {
+    if (!sessionId) {
+      Cookies.remove('sessionId')
+      return
+    }
     state.sessionId = sessionId
     Cookies.set('sessionId', sessionId, { expires })
   },
 
   setEtag: (state, { etag }) => {
+    if (!etag) {
+      Cookies.remove('etag')
+      return
+    }
     state.etag = etag
     Cookies.set('etag', etag)
   },
@@ -80,15 +88,11 @@ const mutations = {
 
 const actions = {
   setSessionId: ({ commit }, { sessionId = '' }) => {
-    if (!sessionId) return
-
     const expiredAt = new Date().getTime() + 5 * 60 * 1000
     commit('setSessionId', { sessionId, expires: new Date(expiredAt) })
   },
 
   setEtag: ({ commit }, { etag = '' }) => {
-    if (!etag) return
-
     commit('setEtag', { etag })
   },
 
@@ -233,6 +237,39 @@ const actions = {
       )
       commit('errorReceiveMessages', { error })
       console.error('Something is wrong [receiveMessages]', error)
+    }
+  },
+
+  endSession: async ({ commit, dispatch, getters }) => {
+    try {
+      commit('beginEndSession')
+      const sessionId = getters.getSessionId
+
+      const { data } = await endSession({ sessionId })
+      commit('successEndSession', { data })
+
+      dispatch('setIsChatting', { isChatting: false })
+      dispatch('setSessionId', { sessionId: null })
+      dispatch('setEtag', { etag: null })
+
+      dispatch(
+        'logging/log',
+        {
+          message: `endSession() - success`,
+        },
+        { root: true }
+      )
+    } catch (error) {
+      commit('errorEndSession', { error })
+      dispatch(
+        'logging/log',
+        {
+          message: `endSession() - error: ${error}`,
+          type: 'error',
+        },
+        { root: true }
+      )
+      console.error('Something is wrong [endSession]', error)
     }
   },
 }

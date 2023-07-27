@@ -73,7 +73,7 @@ import ChatOptions from '~/components/ChatOptions.vue'
 
 let receiveMessageInterval = null
 
-const INACTIVITY_TIME_LIMIT = 60
+const INACTIVITY_TIME_LIMIT = 20
 let currentInactiveTime = 0
 let inactivityInterval = null
 
@@ -154,14 +154,9 @@ export default {
       window.addEventListener('touchend', this.inactivityHandler)
       window.addEventListener('keyup', this.inactivityHandler)
 
-      inactivityInterval = setInterval(() => {
-        currentInactiveTime++
-        console.log('inactiveTime', currentInactiveTime)
-        if (currentInactiveTime === INACTIVITY_TIME_LIMIT) {
-          alert('INACTIVE FOR TOO LONG')
-          clearInterval(inactivityInterval)
-        }
-      }, 1000)
+      if (this.getIsChatting) {
+        this.playInactivityInterval()
+      }
     })
   },
   beforeDestroy() {
@@ -183,6 +178,7 @@ export default {
       getChatLogs: 'chatbotGpt/getChatLogs',
       sendMessageAction: 'chatbotGpt/sendMessage',
       sendAttachmentAction: 'chatbotGpt/sendAttachment',
+      endSessionAction: 'chatbotGpt/endSession',
       receiveMessagesAction: 'chatbotGpt/receiveMessages',
     }),
 
@@ -193,6 +189,20 @@ export default {
       if (evt) {
         currentInactiveTime = 0
       }
+    },
+
+    playInactivityInterval() {
+      const self = this
+      inactivityInterval = setInterval(() => {
+        currentInactiveTime++
+        console.log('inactiveTime', currentInactiveTime)
+        if (currentInactiveTime === INACTIVITY_TIME_LIMIT) {
+          alert('INACTIVE FOR TOO LONG, ENDING SESSION')
+          self.endSessionAction()
+          clearInterval(receiveMessageInterval)
+          clearInterval(inactivityInterval)
+        }
+      }, 1000)
     },
 
     /**
@@ -210,6 +220,7 @@ export default {
         }
         this.sendMessageAction({ message })
         this.scrollToBottom()
+        this.playInactivityInterval()
       } catch (error) {
         console.log('error', error)
       }
@@ -217,6 +228,7 @@ export default {
 
     onReceiveMessage() {
       console.log('receiving message')
+      this.playInactivityInterval()
     },
 
     scrollToBottom() {
