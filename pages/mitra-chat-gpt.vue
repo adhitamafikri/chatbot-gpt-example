@@ -272,6 +272,7 @@ export default {
         this.sendMessageAction({ message })
         this.scrollToBottom()
         this.onAttachmentPreviewClose()
+        this.playInactivityInterval()
       } catch (error) {
         console.log('error', error)
       }
