@@ -25,20 +25,20 @@ export const sendMessage = ({ message = {}, sessionId = null }) => {
   })
 }
 
-export const sendAttachment = ({ attachment = '', sessionId = null }) => {
+export const sendAttachment = ({ message = {}, sessionId = null }) => {
   return new Promise((resolve, reject) => {
     const reqHeaders = {
       session_id: sessionId,
     }
     const reqBody = {
-      attachment,
+      message,
     }
     console.log('requesting with headers', reqHeaders)
     console.log('requesting with body', reqBody)
     const timeout = setTimeout(() => {
       resolve({
         data: {
-          attachment,
+          message,
           msg: 'Attachment Successfully sent',
         },
       })
@@ -70,7 +70,14 @@ export const receiveMessages = ({ sessionId = null, etag = null }) => {
       {
         ...MESSAGE_SCHEMA,
         content: 'Reply from GPT With Options',
-        options: ['PJ Morton', 'Mali', 'Bryson Tiller', 'TM88', 'Snoh Aalegra', 'Migos'],
+        options: [
+          'PJ Morton',
+          'Mali',
+          'Bryson Tiller',
+          'TM88',
+          'Snoh Aalegra',
+          'Migos',
+        ],
         nick: 'gpt',
       },
     ]

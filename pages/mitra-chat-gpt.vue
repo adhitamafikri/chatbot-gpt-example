@@ -29,6 +29,37 @@
       :options="options"
     ></chat-options>
     <typing-area></typing-area>
+
+    <div
+      v-if="attachmentPreview.active"
+      class="attachment-preview flex flex-row justify-center items-center"
+    >
+      <div
+        class="attachment-previw__content flex flex-row justify-center items-center"
+        style="width: 80%"
+      >
+        <img :src="attachmentPreview.src" style="width: auto; height: 100%" />
+        <div
+          class="attachment-preview__actions w-full flex flex-row justify-between items-center p-4"
+        >
+          <button
+            class="text-white font-bold"
+            type="button"
+            @click="onAttachmentPreviewClose"
+          >
+            Close
+          </button>
+          <button
+            v-if="!attachmentPreview.previewOnly"
+            class="text-white font-bold"
+            type="button"
+            @click="onAttachmentSend"
+          >
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -45,6 +76,15 @@ let receiveMessageInterval = null
 export default {
   name: 'MitraChatGPT',
   components: { TypingArea, ChatBubble, ChatOptions },
+  data() {
+    return {
+      attachmentPreview: {
+        active: false,
+        src: '', // base64
+        previewOnly: false,
+      },
+    }
+  },
   computed: {
     ...mapGetters({
       getMessages: 'chatbotGpt/getMessages',
@@ -99,18 +139,24 @@ export default {
 
     this.$nextTick(() => {
       chatbotGptEventBus.$on(busEvents.sendMessage, this.onSendMessage)
+      chatbotGptEventBus.$on(
+        busEvents.attachmentPreview,
+        this.onAttachmentPreview
+      )
       chatbotGptEventBus.$on(busEvents.receiveMessage, this.onReceiveMessage)
     })
   },
   beforeDestroy() {
     clearInterval(receiveMessageInterval)
     chatbotGptEventBus.$off(busEvents.sendMessage)
+    chatbotGptEventBus.$off(busEvents.attachmentPreview)
     chatbotGptEventBus.$off(busEvents.receiveMessage)
   },
   methods: {
     ...mapActions({
       getChatLogs: 'chatbotGpt/getChatLogs',
       sendMessageAction: 'chatbotGpt/sendMessage',
+      sendAttachmentAction: 'chatbotGpt/sendAttachment',
       receiveMessagesAction: 'chatbotGpt/receiveMessages',
     }),
 
@@ -147,6 +193,42 @@ export default {
         behavior: 'smooth',
       })
     },
+
+    /**
+     * This action will be invoked by every component that $emits 'attachmentPreview' event from chatbotGptEventBus
+     * This action will actually send the message
+     * @param {object} param - emitted from 'attachmentPreview' event from chatbotGptEventBus
+     * @param {string} param.attachment - base64
+     * @param {boolean} param.previewOnly
+     */
+    onAttachmentPreview({ attachment = '', previewOnly = false }) {
+      this.attachmentPreview = {
+        active: true,
+        src: attachment,
+        previewOnly,
+      }
+    },
+    onAttachmentPreviewClose() {
+      this.attachmentPreview = {
+        active: false,
+        src: '',
+        previewOnly: false,
+      }
+    },
+    onAttachmentSend() {
+      try {
+        const message = {
+          ...MESSAGE_SCHEMA,
+          attachment: this.attachmentPreview.src,
+          nick: 'visitor',
+        }
+        this.sendMessageAction({ message })
+        this.scrollToBottom()
+        this.onAttachmentPreviewClose()
+      } catch (error) {
+        console.log('error', error)
+      }
+    },
   },
 }
 </script>
@@ -159,5 +241,20 @@ export default {
 }
 .message-list--has-options {
   height: calc(100vh - (64px + 64px + 64px));
+}
+
+.attachment-preview {
+  background-color: rgba(0, 0, 0, 0.75);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 13;
+}
+.attachment-preview__actions {
+  position: absolute;
+  left: 0;
+  bottom: 0;
 }
 </style>

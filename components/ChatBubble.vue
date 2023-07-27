@@ -10,8 +10,23 @@
     <div
       class="bubble__inner bg-white shadow-lg border border-slate-300 rounded-lg p-4"
     >
+      <!-- Text or HTML content -->
       <div v-html="message.content" />
 
+      <!-- Attachment Content -->
+      <div
+        v-if="attachment"
+        class="bubble__attachment flex flex-row justify-center items-center"
+        style="width: 180px"
+      >
+        <img
+          :src="message.attachment"
+          style="width: 100%"
+          @click="onAttachmentClick"
+        />
+      </div>
+
+      <!-- Options -->
       <div v-if="bubbleOptions && hasOptions" class="bubble__options mt-2">
         <button
           v-for="(option, id) in options"
@@ -32,7 +47,10 @@
 
 <script>
 import { mapActions } from 'vuex'
-import chatbotGptEventBus, { busEvents } from '~/utils/chatbotGptEventBus'
+import chatbotGptEventBus, {
+  busEvents,
+  busEventsPayload,
+} from '~/utils/chatbotGptEventBus'
 
 export default {
   name: 'ChatBubble',
@@ -64,6 +82,9 @@ export default {
     hasOptions() {
       return !!this.options?.length
     },
+    attachment() {
+      return this.message.attachment
+    },
   },
   methods: {
     ...mapActions({
@@ -76,6 +97,14 @@ export default {
       })
       this.log({
         message: `onOptionClick() - ChatBubble - ${option}`,
+      })
+    },
+
+    onAttachmentClick() {
+      chatbotGptEventBus.$emit(busEvents.attachmentPreview, {
+        ...busEventsPayload.attachmentPreview,
+        attachment: this.attachment,
+        previewOnly: true,
       })
     },
   },

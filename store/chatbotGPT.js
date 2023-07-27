@@ -3,7 +3,7 @@ import { LS_KEYS } from '~/utils/storage-keys'
 import generateMutations from '~/utils/generate-mutations'
 import {
   sendMessage,
-  // sendAttachment,
+  sendAttachment,
   receiveMessages,
   // endSession,
 } from '~/api/chatbotGpt-api'
@@ -163,6 +163,41 @@ const actions = {
         { root: true }
       )
       console.error('Something is wrong [sendMessage]', error)
+    }
+  },
+
+  sendAttachment: async ({ commit, dispatch, getters }, { message = {} }) => {
+    try {
+      const currentMessages = getters.getMessages
+      dispatch('setMessages', { messages: [...currentMessages, message] })
+
+      commit('beginSendAttachment')
+      const sessionId = getters.getSessionId
+      dispatch('setSessionId', { sessionId })
+
+      const { data } = await sendAttachment({ message, sessionId })
+      commit('successSendAttachment', { data })
+
+      dispatch('setIsChatting', { isChatting: true })
+
+      dispatch(
+        'logging/log',
+        {
+          message: `sendAttachment() - sent: ${message.content}`,
+        },
+        { root: true }
+      )
+    } catch (error) {
+      commit('errorSendAttachment', { error })
+      dispatch(
+        'logging/log',
+        {
+          message: `sendAttachment() - error: ${error}`,
+          type: 'error',
+        },
+        { root: true }
+      )
+      console.error('Something is wrong [sendAttachment]', error)
     }
   },
 
