@@ -73,6 +73,10 @@ import ChatOptions from '~/components/ChatOptions.vue'
 
 let receiveMessageInterval = null
 
+const INACTIVITY_TIME_LIMIT = 60
+let currentInactiveTime = 0
+let inactivityInterval = null
+
 export default {
   name: 'MitraChatGPT',
   components: { TypingArea, ChatBubble, ChatOptions },
@@ -144,13 +148,35 @@ export default {
         this.onAttachmentPreview
       )
       chatbotGptEventBus.$on(busEvents.receiveMessage, this.onReceiveMessage)
+
+      this.$refs.messageList.addEventListener('scroll', this.inactivityHandler)
+      window.addEventListener('mousemove', this.inactivityHandler)
+      window.addEventListener('touchend', this.inactivityHandler)
+      window.addEventListener('keyup', this.inactivityHandler)
+
+      inactivityInterval = setInterval(() => {
+        currentInactiveTime++
+        console.log('inactiveTime', currentInactiveTime)
+        if (currentInactiveTime === INACTIVITY_TIME_LIMIT) {
+          alert('INACTIVE FOR TOO LONG')
+          clearInterval(inactivityInterval)
+        }
+      }, 1000)
     })
   },
   beforeDestroy() {
     clearInterval(receiveMessageInterval)
-    chatbotGptEventBus.$off(busEvents.sendMessage)
-    chatbotGptEventBus.$off(busEvents.attachmentPreview)
-    chatbotGptEventBus.$off(busEvents.receiveMessage)
+    chatbotGptEventBus.$off(busEvents.sendMessage, this.onSendMessage)
+    chatbotGptEventBus.$off(
+      busEvents.attachmentPreview,
+      this.onAttachmentPreview
+    )
+    chatbotGptEventBus.$off(busEvents.receiveMessage, this.onReceiveMessage)
+
+    this.$refs.messageList.removeEventListener('scroll', this.inactivityHandler)
+    window.removeEventListener('mousemove', this.inactivityHandler)
+    window.removeEventListener('touchend', this.inactivityHandler)
+    window.removeEventListener('keyup', this.inactivityHandler)
   },
   methods: {
     ...mapActions({
@@ -159,6 +185,15 @@ export default {
       sendAttachmentAction: 'chatbotGpt/sendAttachment',
       receiveMessagesAction: 'chatbotGpt/receiveMessages',
     }),
+
+    /**
+     * @param {Event} evt
+     */
+    inactivityHandler(evt) {
+      if (evt) {
+        currentInactiveTime = 0
+      }
+    },
 
     /**
      * This action will be invoked by every component that $emits 'sendMessage' event from chatbotGptEventBus
