@@ -16,6 +16,12 @@
           class="mt-4"
         ></chat-bubble>
       </template>
+
+      <div
+        ref="referenceLine"
+        class="reference-line w-full bg-yellow-200"
+        style="height: 40px"
+      ></div>
     </div>
 
     <chat-options
@@ -91,8 +97,10 @@ export default {
   mounted() {
     this.getChatLogs()
 
-    chatbotGptEventBus.$on(busEvents.sendMessage, this.onSendMessage)
-    chatbotGptEventBus.$on(busEvents.receiveMessage, this.onReceiveMessage)
+    this.$nextTick(() => {
+      chatbotGptEventBus.$on(busEvents.sendMessage, this.onSendMessage)
+      chatbotGptEventBus.$on(busEvents.receiveMessage, this.onReceiveMessage)
+    })
   },
   beforeDestroy() {
     clearInterval(receiveMessageInterval)
@@ -112,14 +120,15 @@ export default {
      * @param {object} param - emitted from 'sendMessage' event from chatbotGptEventBus
      * @param {string} param.text - emitted from 'sendMessage' event from chatbotGptEventBus
      */
-    async onSendMessage({ text = '' }) {
+    onSendMessage({ text = '' }) {
       try {
         const message = {
           ...MESSAGE_SCHEMA,
           content: text,
           nick: 'visitor',
         }
-        await this.sendMessageAction({ message })
+        this.sendMessageAction({ message })
+        this.scrollToBottom()
       } catch (error) {
         console.log('error', error)
       }
@@ -127,6 +136,16 @@ export default {
 
     onReceiveMessage() {
       console.log('receiving message')
+    },
+
+    scrollToBottom() {
+      const { top } = this.$refs.referenceLine.getBoundingClientRect()
+      const into = this.$refs.messageList.scrollHeight
+      const finalPosition = top + into
+      this.$refs.messageList.scrollTo({
+        top: finalPosition,
+        behavior: 'smooth',
+      })
     },
   },
 }
