@@ -73,7 +73,7 @@ import ChatOptions from '~/components/ChatOptions.vue'
 
 let receiveMessageInterval = null
 
-const INACTIVITY_TIME_LIMIT = 60
+const INACTIVITY_TIME_LIMIT = 60 * 15
 let currentInactiveTime = 0
 let inactivityInterval = null
 
