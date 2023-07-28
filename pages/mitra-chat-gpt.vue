@@ -134,7 +134,7 @@ export default {
   watch: {
     getIsChatting(newVal) {
       if (newVal) {
-        receiveMessageInterval = setInterval(this.receiveMessagesAction, 10000)
+        receiveMessageInterval = setInterval(this.receiveMessagesAction, 7500)
       }
     },
   },
